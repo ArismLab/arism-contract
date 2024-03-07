@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-contract NodeManager {
+contract NodeManagement {
     address public owner;
 
     struct Node {
         address nodeAddress;
         string endpoint;
         string publicKey;
-        string nodeId;
+        uint8 nodeId;
         string experyDate;
     }
 
@@ -29,6 +29,7 @@ contract NodeManager {
     }
 
     function voteForRemoveNode(address nodeAddress) public {
+        require(backupNodes.length > 0, "No backup nodes available");
         require(whitelist[msg.sender], "Only whitelisted can vote");
         for (uint8 i = 0; i < operatorsNodes.length; i++) {
             if (operatorsNodes[i].nodeAddress == nodeAddress) {
@@ -37,10 +38,10 @@ contract NodeManager {
             }
         }
         if (votesForRemoveNode >= 3) {
-            whitelist[operatorsNodes[i]] = false;
+            whitelist[operatorsNodes[i].nodeAddress] = false;
             delete operatorsNodes[i];
-            operatorsNodes.push(backupNodes[0]);
-            whitelist[backupNodes[0]] = true;
+            operatorsNodes.push(backupNodes[0].nodeAddress);
+            whitelist[backupNodes[0].nodeAddress] = true;
             delete backupNodes[0];
             votesForRemoveNode = 0;
         }

@@ -1,5 +1,5 @@
 {
-  "name": "node-management",
+  "name": "arism-contract",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArismLab/node-management.git"
+    "url": "git+https://github.com/ArismLab/arism-contract.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ArismLab/node-management/issues"
+    "url": "https://github.com/ArismLab/arism-contract/issues"
   },
-  "homepage": "https://github.com/ArismLab/node-management#readme",
+  "homepage": "https://github.com/ArismLab/arism-contract#readme",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^2.0.0",
     "hardhat": "^2.21.0"

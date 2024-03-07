@@ -6,6 +6,6 @@ import { expect } from "chai";
 import hre from "hardhat";
 import { getAddress, parseGwei } from "viem";
 
-describe("NodeManager", function () {
+describe("NodeManagement", function () {
 
 });
