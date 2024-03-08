@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-contract NodeManagement {
+contract NodeList {
     address public owner;
 
     constructor() {
@@ -62,14 +62,41 @@ contract NodeManagement {
 
     function getEpochInfo(
         uint256 epoch
-    ) external view epochValid(epoch) returns (Epoch memory) {
-        return epochInfo[epoch];
+    )
+        external
+        view
+        epochValid(epoch)
+        returns (
+            uint256 id,
+            uint256 n,
+            uint256 k,
+            uint256 t,
+            address[] memory nodeList,
+            uint256 prevEpoch,
+            uint256 nextEpoch
+        )
+    {
+        Epoch storage epochI = epochInfo[epoch];
+        return (
+            epochI.id,
+            epochI.n,
+            epochI.k,
+            epochI.t,
+            epochI.nodeList,
+            epochI.prevEpoch,
+            epochI.nextEpoch
+        );
     }
 
     function getNodeDetails(
         address nodeAddress
-    ) external view returns (Node memory) {
-        return nodeDetails[nodeAddress];
+    )
+        external
+        view
+        returns (uint256 nodeId, uint256 pubx, uint256 puby, string memory url)
+    {
+        Node storage node = nodeDetails[nodeAddress];
+        return (node.nodeId, node.pubx, node.puby, node.url);
     }
 
     function getPssStatus(

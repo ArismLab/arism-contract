@@ -6,18 +6,11 @@ pragma solidity ^0.8.24;
 contract ARMToken is ERC20 {
     constructor() ERC20("ARMToken", "ARM") {}
 
-    function _mintMinerReward() internal {
-        _mint(block.coinbase, 1000);
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual override {
-        if (!(from == address(0) && to == block.coinbase)) {
-            _mintMinerReward();
-        }
-        super._beforeTokenTransfer(from, to, value);
+    function burn(address from, uint256 amount) external {
+        _burn(from, amount);
     }
 }
