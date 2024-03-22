@@ -16,36 +16,42 @@ contract ARMToken is ERC20 {
         uint256 lockTime;
     }
 
-    struct Node {
+    struct NodeDetail {
         uint256 nodeId;
         uint256 pubx;
         uint256 puby;
         string url;
     }
 
-    mapping(address => Node) public nodeDetails;
-    mapping(address => bool) public whitelist;
-    mapping(address => StakeInfo) public stakeInfo;
+    struct Node {
+        NodeDetail nodeDetails;
+        StakeInfo stakeInfo;
+    }
 
-    function stakeARM(uint256 amount) external {
+    mapping(address => Node) public mainNet;
+    mapping(address => Node) public hangingNodes;
+
+    mapping(address => Node) public info;
+
+    function stake(uint256 amount) external {
         require(
             transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
         );
-        stakeInfo[msg.sender] = StakeInfo({
+        info[msg.sender].stakeInfo = StakeInfo({
             amount: amount,
             lockTime: block.timestamp
         });
     }
 
     function rewardFromStake() external {
-        require(stakeInfo[msg.sender].amount > 0, "No stake found");
+        require(info[msg.sender].stakeInfo.amount > 0, "No stake found");
         require(
-            block.timestamp - stakeInfo[msg.sender].lockTime > 1 days,
+            block.timestamp - info[msg.sender].stakeInfo.lockTime > 1 days,
             "Stake is locked"
         );
-        uint256 reward = stakeInfo[msg.sender].amount / 10;
+        uint256 reward = info[msg.sender].stakeInfo.amount / 10;
         _transfer(address(this), msg.sender, reward);
-        stakeInfo[msg.sender].lockTime = block.timestamp;
+        info[msg.sender].stakeInfo.lockTime = block.timestamp;
     }
 }
