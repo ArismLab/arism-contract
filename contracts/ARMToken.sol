@@ -31,27 +31,44 @@ contract ARMToken is ERC20 {
     mapping(address => Node) public mainNet;
     mapping(address => Node) public hangingNodes;
 
-    mapping(address => Node) public info;
-
     function stake(uint256 amount) external {
         require(
             transferFrom(msg.sender, address(this), amount),
             "Transfer failed"
         );
-        info[msg.sender].stakeInfo = StakeInfo({
+        hangingNodes[msg.sender].stakeInfo = StakeInfo({
             amount: amount,
             lockTime: block.timestamp
         });
     }
 
     function rewardFromStake() external {
-        require(info[msg.sender].stakeInfo.amount > 0, "No stake found");
         require(
-            block.timestamp - info[msg.sender].stakeInfo.lockTime > 1 days,
+            hangingNodes[msg.sender].stakeInfo.amount > 0,
+            "No stake found"
+        );
+        require(
+            block.timestamp - hangingNodes[msg.sender].stakeInfo.lockTime >
+                1 days,
             "Stake is locked"
         );
-        uint256 reward = info[msg.sender].stakeInfo.amount / 10;
+        uint256 reward = hangingNodes[msg.sender].stakeInfo.amount / 10;
         _transfer(address(this), msg.sender, reward);
-        info[msg.sender].stakeInfo.lockTime = block.timestamp;
+        hangingNodes[msg.sender].stakeInfo.lockTime = block.timestamp;
+    }
+
+    function withdrawStake() external {
+        require(
+            hangingNodes[msg.sender].stakeInfo.amount > 0,
+            "No stake found"
+        );
+        require(
+            block.timestamp - hangingNodes[msg.sender].stakeInfo.lockTime >
+                1 days,
+            "Stake is locked"
+        );
+        uint256 amount = hangingNodes[msg.sender].stakeInfo.amount;
+        _transfer(address(this), msg.sender, amount);
+        hangingNodes[msg.sender].stakeInfo.amount = 0;
     }
 }
