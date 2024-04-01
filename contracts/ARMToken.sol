@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "solidity-treemap/contracts/TreeMap.sol";
 
 pragma solidity ^0.8.24;
 
@@ -21,20 +23,23 @@ contract ARMToken is ERC20 {
         DEADNET
     }
 
-    IERC20 public token;
+    IERC20 public arismToken;
 
     address public owner;
     uint256 public hangingNodeCount;
+    using TreeMap for TreeMap.Map;
+
     mapping(Network => mapping(address => Stake)) public stakes;
     mapping(Network => uint256) public interest;
 
+    TreeMap.Map public hangingQueue;
     Validator[5] public validators;
 
     constructor() ERC20("ARMToken", "ARM") {
         owner = msg.sender;
         _mint(msg.sender, 1000000000000000000000000000);
         _mint(address(this), 1000000000000000000000000000);
-        token = IERC20(address(this));
+        arismToken = IERC20(address(this));
 
         interest[Network.Validator] = 10;
         interest[Network.HANGING] = 5;
@@ -53,9 +58,7 @@ contract ARMToken is ERC20 {
     }
 
     function hangingQueue() public view returns (address[] memory) {
-        // TODO
-
-        return new address[](0);
+        return hangingQueue.keys();
     }
 
     function getNetwork(address user) public view returns (Network) {
@@ -71,7 +74,7 @@ contract ARMToken is ERC20 {
     }
 
     function register(string memory url, uint256 locked) public payable {
-        token.transfer(address(this), locked);
+        arismToken.transfer(address(this), locked);
 
         uint256 validatorLength = validators.length;
 
@@ -84,6 +87,7 @@ contract ARMToken is ERC20 {
                 new address[](0)
             );
         } else {
+            hangingQueue.insert(msg.sender, 0);
             stakes[Network.HANGING][msg.sender] = stake;
         }
     }
@@ -95,7 +99,7 @@ contract ARMToken is ERC20 {
         _refreshReward(msg.sender);
         Stake storage stake = stakes[network][msg.sender];
 
-        token.transfer(msg.sender, stake.locked);
+        arismToken.transfer(msg.sender, stake.locked);
         delete stakes[network][msg.sender];
     }
 
@@ -108,7 +112,7 @@ contract ARMToken is ERC20 {
         uint256 reward = stake.reward;
         stake.reward = 0;
 
-        token.transfer(msg.sender, reward);
+        arismToken.transfer(msg.sender, reward);
     }
 
     function vote(uint256 id) public {
