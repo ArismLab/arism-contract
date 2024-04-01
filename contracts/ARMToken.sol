@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "solidity-treemap/contracts/TreeMap.sol";
+import "./TreeMap.sol";
 
 pragma solidity ^0.8.24;
 
@@ -32,8 +31,10 @@ contract ARMToken is ERC20 {
     mapping(Network => mapping(address => Stake)) public stakes;
     mapping(Network => uint256) public interest;
 
+    mapping(uint256 => address) keyIndex;
+
     TreeMap.Map public hangingQueue;
-    Validator[5] public validators;
+    Validator[] public validators;
 
     constructor() ERC20("ARMToken", "ARM") {
         owner = msg.sender;
@@ -57,10 +58,6 @@ contract ARMToken is ERC20 {
         stake.timestamp = block.timestamp;
     }
 
-    function hangingQueue() public view returns (address[] memory) {
-        return hangingQueue.keys();
-    }
-
     function getNetwork(address user) public view returns (Network) {
         if (stakes[Network.Validator][user].locked > 0) {
             return Network.Validator;
@@ -82,13 +79,12 @@ contract ARMToken is ERC20 {
 
         if (validatorLength < 5) {
             stakes[Network.Validator][msg.sender] = stake;
-            validators[validatorLength] = Validator(
-                msg.sender,
-                new address[](0)
-            );
+            validators.push(Validator(msg.sender, new address[](0)));
         } else {
-            hangingQueue.insert(msg.sender, 0);
             stakes[Network.HANGING][msg.sender] = stake;
+            keyIndex[hangingNodeCount] = msg.sender;
+            hangingQueue.putIfAbsent(hangingNodeCount, 0);
+            hangingNodeCount++;
         }
     }
 
@@ -135,11 +131,11 @@ contract ARMToken is ERC20 {
             stakes[Network.DEADNET][victimNode.user] = victimStake;
             delete stakes[Network.Validator][victimNode.user];
 
-            address newNode = hangingQueue()[0];
+            address newNode = keyIndex[hangingQueue.size() - 1];
+            hangingQueue.remove(hangingQueue.size() - 1);
 
             stakes[Network.Validator][newNode] = stakes[network][newNode];
             delete stakes[Network.HANGING][newNode];
-
             validators[id - 1] = Validator(msg.sender, new address[](0));
         }
     }
@@ -153,7 +149,7 @@ contract ARMToken is ERC20 {
     function getValidators() public view returns (ValidatorResult[] memory) {
         ValidatorResult[] memory result = new ValidatorResult[](5);
 
-        for (uint8 i = 0; i < 5; i++) {
+        for (uint8 i = 0; i < validators.length; i++) {
             Validator storage validator = validators[i];
             result[i] = ValidatorResult(
                 i + 1,
