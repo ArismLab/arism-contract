@@ -22,8 +22,6 @@ contract ARMToken is ERC20 {
         DEADNET
     }
 
-    IERC20 public arismToken;
-
     address public owner;
     uint256 public hangingNodeCount;
     using TreeMap for TreeMap.Map;
@@ -40,8 +38,6 @@ contract ARMToken is ERC20 {
         owner = msg.sender;
         _mint(msg.sender, 1000000000000000000000000000);
         _mint(address(this), 1000000000000000000000000000);
-        arismToken = IERC20(address(this));
-
         interest[Network.Validator] = 10;
         interest[Network.HANGING] = 5;
         interest[Network.DEADNET] = 0;
@@ -71,7 +67,7 @@ contract ARMToken is ERC20 {
     }
 
     function register(string memory url, uint256 locked) public payable {
-        arismToken.transfer(address(this), locked);
+        _transfer(msg.sender, address(this), locked);
 
         uint256 validatorLength = validators.length;
 
@@ -83,7 +79,7 @@ contract ARMToken is ERC20 {
         } else {
             stakes[Network.HANGING][msg.sender] = stake;
             keyIndex[hangingNodeCount] = msg.sender;
-            hangingQueue.putIfAbsent(hangingNodeCount, 0);
+            hangingQueue.putIfAbsent(hangingNodeCount, locked);
             hangingNodeCount++;
         }
     }
@@ -95,7 +91,7 @@ contract ARMToken is ERC20 {
         _refreshReward(msg.sender);
         Stake storage stake = stakes[network][msg.sender];
 
-        arismToken.transfer(msg.sender, stake.locked);
+        _transfer(address(this), msg.sender, stake.locked);
         delete stakes[network][msg.sender];
     }
 
@@ -108,7 +104,7 @@ contract ARMToken is ERC20 {
         uint256 reward = stake.reward;
         stake.reward = 0;
 
-        arismToken.transfer(msg.sender, reward);
+        _transfer(address(this), msg.sender, reward);
     }
 
     function vote(uint256 id) public {
@@ -159,5 +155,9 @@ contract ARMToken is ERC20 {
         }
 
         return result;
+    }
+
+    function getMyBalance() public view returns (uint256) {
+        return balanceOf(msg.sender);
     }
 }
