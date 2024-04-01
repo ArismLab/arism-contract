@@ -21,6 +21,8 @@ contract ARMToken is ERC20 {
         DEADNET
     }
 
+    IERC20 public token;
+
     address public owner;
     uint256 public hangingNodeCount;
     mapping(Network => mapping(address => Stake)) public stakes;
@@ -32,6 +34,7 @@ contract ARMToken is ERC20 {
         owner = msg.sender;
         _mint(msg.sender, 1000000000000000000000000000);
         _mint(address(this), 1000000000000000000000000000);
+        token = IERC20(address(this));
 
         interest[Network.Validator] = 10;
         interest[Network.HANGING] = 5;
@@ -68,7 +71,7 @@ contract ARMToken is ERC20 {
     }
 
     function register(string memory url, uint256 locked) public payable {
-        transfer(address(this), locked);
+        token.transfer(address(this), locked);
 
         uint256 validatorLength = validators.length;
 
@@ -92,7 +95,7 @@ contract ARMToken is ERC20 {
         _refreshReward(msg.sender);
         Stake storage stake = stakes[network][msg.sender];
 
-        _transfer(address(this), msg.sender, stake.locked);
+        token.transfer(msg.sender, stake.locked);
         delete stakes[network][msg.sender];
     }
 
@@ -105,7 +108,7 @@ contract ARMToken is ERC20 {
         uint256 reward = stake.reward;
         stake.reward = 0;
 
-        _transfer(address(this), msg.sender, reward);
+        token.transfer(msg.sender, reward);
     }
 
     function vote(uint256 id) public {
