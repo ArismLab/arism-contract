@@ -38,12 +38,10 @@ contract StakeNode {
         string memory endpoint
     ) internal whitelisted(msg.sender) {
         WatingList.push(NodeDetail(nodeAddress, amount, time, endpoint));
-        whitelist[nodeAddress] = true;
     }
 
     function _listNetwork() internal {
-        uint256 length = threshold - Network.length;
-        for (uint256 i = 0; i < length; i++) {
+        for (uint256 i = 0; i < threshold; i++) {
             uint256 index = random(abi.encodePacked(msg.sig)) %
                 WatingList.length;
             NodeDetail memory node = WatingList[index];
@@ -67,8 +65,14 @@ contract StakeNode {
             for (uint256 i = 0; i < Network.length; i++) {
                 if (Network[i].nodeAddress == nodeAddress) {
                     Network[i] = Network[Network.length - 1];
-                    Network.pop();
-                    _listNetwork();
+                    uint256 index = random(abi.encodePacked(msg.sig)) %
+                        WatingList.length;
+
+                    Network[i] = WatingList[index];
+
+                    // Remove node from waiting list
+                    WatingList[index] = WatingList[WatingList.length - 1];
+                    WatingList.pop();
                 }
             }
         }
@@ -85,8 +89,14 @@ contract StakeNode {
             if (Network[i].nodeAddress == nodeAddress) {
                 Network[i] = Network[Network.length - 1];
                 node = Network[Network.length - 1];
+                uint256 index = random(abi.encodePacked(msg.sig)) %
+                    WatingList.length;
+                Network[i] = WatingList[index];
                 Network.pop();
-                _listNetwork();
+                nodeRemoved = node;
+                // Remove node from waiting list
+                WatingList[index] = WatingList[WatingList.length - 1];
+                WatingList.pop();
             }
         }
         return nodeRemoved;
