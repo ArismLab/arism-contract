@@ -74,6 +74,24 @@ contract StakeNode {
         }
     }
 
+    function _unListNodes(
+        address nodeAddress
+    ) internal returns (NodeDetail memory node) {
+        if (msg.sender != nodeAddress) {
+            revert("Only node can call this function");
+        }
+        NodeDetail memory nodeRemoved;
+        for (uint256 i = 0; i < Network.length; i++) {
+            if (Network[i].nodeAddress == nodeAddress) {
+                Network[i] = Network[Network.length - 1];
+                node = Network[Network.length - 1];
+                Network.pop();
+                _listNetwork();
+            }
+        }
+        return nodeRemoved;
+    }
+
     function getNetwork() external view returns (NodeDetail[] memory) {
         return Network;
     }
