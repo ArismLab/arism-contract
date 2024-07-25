@@ -49,7 +49,7 @@ contract NodeManagerUpdradeable is
 
         _updateThreshold(_threshold);
         _updateVoteThreshold(_voteThreshold);
-        _setFeePerDay(_feePerHour);
+        _setFeePerHour(_feePerHour);
     }
 
     address currency;
