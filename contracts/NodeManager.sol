@@ -94,7 +94,7 @@ contract NodeManagerUpdradeable is
         _listNode(nodeAddress, amount, time, endpoint);
     }
 
-    function setFeePerDay(
+    function setFeePerHour(
         uint256 _feePerHour
     ) external onlyRole(LibRoles.OPERATOR_ROLE) {
         _setFeePerDay(_feePerHour);
