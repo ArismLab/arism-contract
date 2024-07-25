@@ -111,7 +111,7 @@ contract NodeManagerUpdradeable is
         TransferToken.transferERC20(
             currency,
             nodeAddress,
-            node.amount + totalFee
+            node.amount + (node.amount * totalFee) / 10000
         );
     }
 
