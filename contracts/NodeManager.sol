@@ -97,7 +97,7 @@ contract NodeManagerUpdradeable is
     function setFeePerHour(
         uint256 _feePerHour
     ) external onlyRole(LibRoles.OPERATOR_ROLE) {
-        _setFeePerDay(_feePerHour);
+        _setFeePerHour(_feePerHour);
     }
 
     function listNetwork() external onlyRole(LibRoles.OPERATOR_ROLE) {

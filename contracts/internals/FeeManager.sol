@@ -4,7 +4,7 @@ pragma solidity 0.8.25;
 contract FeeManager {
     uint256 internal feePerHour;
 
-    function _setFeePerDay(uint256 _feePerHour) internal {
+    function _setFeePerHour(uint256 _feePerHour) internal {
         feePerHour = _feePerHour;
     }
 
